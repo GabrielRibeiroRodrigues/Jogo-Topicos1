@@ -980,9 +980,14 @@ class Game:
         camx, camy = camera
         ox, oy     = shake
         T = constantes.TAM_TILE
-        self.tela.fill(constantes.COR_CHAO)
 
-        tile  = assets_loader.tile_chao(T)
+        # Preenche toda a tela com cor escura (área fora do mapa)
+        self.tela.fill((6, 8, 14))
+
+        tile_main = assets_loader.tile_chao(T)
+        tile_alt  = assets_loader.tile_chao_alt(T)
+        tile_b    = assets_loader.tile_chao_b(T)
+
         mapa_cols = self.mundo_largura  // T
         mapa_rows = self.mundo_altura // T
         start_col = int(camx) // T
@@ -995,12 +1000,54 @@ class Game:
                 if 0 <= col < mapa_cols and 0 <= row < mapa_rows:
                     sx = col * T - int(camx) + ox
                     sy = row * T - int(camy) + oy
-                    self.tela.blit(tile, (sx, sy))
+                    # Variação de tile baseada em posição (sem random para ser determinístico)
+                    v = (col * 3 + row * 7) % 10
+                    if v < 7:
+                        self.tela.blit(tile_main, (sx, sy))
+                    elif v < 9:
+                        self.tela.blit(tile_alt, (sx, sy))
+                    else:
+                        self.tela.blit(tile_b, (sx, sy))
 
-        # Borda escura
+        # Linhas neon sutis a cada 4 tiles (grid cyberpunk no chão)
+        neon_overlay = self._get_neon_floor_overlay(T, mapa_cols, mapa_rows,
+                                                     int(camx), int(camy), ox, oy)
+        self.tela.blit(neon_overlay, (0, 0))
+
+        # Borda escura nas extremidades da tela
         sombra = pygame.Surface((constantes.LARGURA, constantes.ALTURA), pygame.SRCALPHA)
-        pygame.draw.rect(sombra, (0, 0, 0, 60), (0, 0, constantes.LARGURA, constantes.ALTURA), 30)
+        pygame.draw.rect(sombra, (0, 0, 0, 80), (0, 0, constantes.LARGURA, constantes.ALTURA), 40)
         self.tela.blit(sombra, (ox, oy))
+
+    def _get_neon_floor_overlay(self, T, mapa_cols, mapa_rows, camx, camy, ox, oy):
+        key = ("neon_overlay", T, mapa_cols, mapa_rows, camx // T, camy // T)
+        if not hasattr(self, '_neon_overlay_cache'):
+            self._neon_overlay_cache = {}
+        if key not in self._neon_overlay_cache:
+            surf = pygame.Surface((constantes.LARGURA, constantes.ALTURA), pygame.SRCALPHA)
+            GRID = T * 4   # a cada 4 tiles
+            # Grade neon ciano bem sutil
+            start_x = -(camx % GRID) + ox
+            start_y = -(camy % GRID) + oy
+            x = start_x
+            while x <= constantes.LARGURA:
+                # Só desenha se dentro dos limites do mapa
+                map_x = (x - ox + camx)
+                if 0 <= map_x <= mapa_cols * T:
+                    pygame.draw.line(surf, (0, 200, 255, 38),
+                                     (int(x), oy), (int(x), constantes.ALTURA + oy), 1)
+                x += GRID
+            y = start_y
+            while y <= constantes.ALTURA:
+                map_y = (y - oy + camy)
+                if 0 <= map_y <= mapa_rows * T:
+                    pygame.draw.line(surf, (0, 200, 255, 38),
+                                     (ox, int(y)), (constantes.LARGURA + ox, int(y)), 1)
+                y += GRID
+            self._neon_overlay_cache[key] = surf
+            if len(self._neon_overlay_cache) > 30:   # evita crescimento ilimitado
+                self._neon_overlay_cache.clear()
+        return self._neon_overlay_cache[key]
 
     # ─────────────────────────────────────────────────────────────────────────
     #  UTILITÁRIOS VISUAIS

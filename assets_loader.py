@@ -1,19 +1,20 @@
 """
-Carrega e fornece sprites prontos do tileset e character sheet baixados do OpenGameArt.
-Tileset: dungeon.png  (16x16 tiles, 26 colunas x 17 linhas)
-Char:    top_down_character_v4.png  (frames 16x32, 8 colunas x 9 linhas)
-Licença: CC0 (domínio público)
+Assets do jogo:
+- dungeon.png / top_down_character_v4.png  — CC0 (OpenGameArt)
+- CyberTileA4.png  — CC-BY 4.0 (cyberpunk bricks + floor)
 """
 import os
 import pygame
 
-_DIR   = os.path.join(os.path.dirname(__file__), "assets", "pack_extracted")
-_TILE  = 16          # tamanho original do tile
-_CFW   = 16          # largura do frame do personagem
-_CFH   = 32          # altura do frame do personagem
+_DIR      = os.path.join(os.path.dirname(__file__), "assets", "pack_extracted")
+_DIR_SCIFI = os.path.join(os.path.dirname(__file__), "assets", "scifi")
+_TILE  = 16
+_CFW   = 16
+_CFH   = 32
 
 _tileset   = None
 _charsheet = None
+_cybertile = None   # CyberTileA4.png
 _cache     = {}
 
 
@@ -24,8 +25,60 @@ def _load():
         _charsheet = pygame.image.load(os.path.join(_DIR, "top_down_character_v4.png")).convert_alpha()
 
 
-# ── tiles ─────────────────────────────────────────────────────────────────────
-def get_tile(col: int, row: int, size: int = 40) -> pygame.Surface:
+def _load_cyber():
+    global _cybertile
+    if _cybertile is None:
+        _cybertile = pygame.image.load(
+            os.path.join(_DIR_SCIFI, "CyberTileA4.png")
+        ).convert_alpha()
+
+
+def _get_cyber_region(rx: int, ry: int, rw: int, rh: int, size: int,
+                      darken=None, brighten=None) -> pygame.Surface:
+    """darken = BLEND_MULT tuple,  brighten = BLEND_ADD tuple"""
+    key = ("cyber", rx, ry, rw, rh, size, darken, brighten)
+    if key not in _cache:
+        _load_cyber()
+        src  = _cybertile.subsurface((rx, ry, rw, rh))
+        surf = pygame.transform.scale(src, (size, size))
+        surf = surf.copy()
+        if darken:
+            surf.fill(darken,  special_flags=pygame.BLEND_MULT)
+        if brighten:
+            surf.fill(brighten, special_flags=pygame.BLEND_ADD)
+        _cache[key] = surf
+    return _cache[key]
+
+
+# ── tiles cyberpunk (CyberTileA4.png) ─────────────────────────────────────────
+# Chão: painéis de concreto industrial  — região (40,400,80,80)  avg≈104 gray
+# Parede: tijolos dark cyberpunk        — região (220,260,80,80) avg≈56  gray
+
+def tile_chao(size=40):
+    # BLEND_ADD +50 para clarear: avg ~154 (60% brightness), leve tint azul
+    return _get_cyber_region(40, 400, 80, 80, size, brighten=(40, 42, 55))
+
+def tile_chao_alt(size=40):
+    return _get_cyber_region(0, 400, 80, 80, size, brighten=(38, 40, 53))
+
+def tile_chao_b(size=40):
+    return _get_cyber_region(40, 440, 80, 80, size, brighten=(45, 47, 58))
+
+def tile_parede(size=40):
+    key = ("cyber_wall_neon", size)
+    if key not in _cache:
+        # Escurece muito + borda neon ciano
+        base = _get_cyber_region(220, 260, 80, 80, size, darken=(100, 100, 115))
+        surf = base.copy()
+        pygame.draw.rect(surf, (0, 140, 200), (0, 0, size, size), 1)
+        _cache[key] = surf
+    return _cache[key]
+
+def tile_parede_dark(size=40):
+    return _get_cyber_region(220, 300, 80, 80, size, darken=(80, 80, 95))
+
+# ── tiles do dungeon original (mantidos para caixa/saida) ─────────────────────
+def _get_dungeon_tile(col: int, row: int, size: int = 40) -> pygame.Surface:
     key = ("tile", col, row, size)
     if key not in _cache:
         _load()
@@ -33,14 +86,8 @@ def get_tile(col: int, row: int, size: int = 40) -> pygame.Surface:
         _cache[key] = pygame.transform.scale(src, (size, size))
     return _cache[key]
 
-
-# Tiles pré-definidos (coordenadas identificadas visualmente no tileset)
-def tile_chao(size=40):       return get_tile(11, 8, size)   # salmon/pink dungeon floor
-def tile_chao_alt(size=40):   return get_tile(10, 7, size)   # variante com ponto
-def tile_parede(size=40):     return get_tile(10, 0, size)   # gray stone – parede
-def tile_parede_dark(size=40):return get_tile(12, 2, size)   # stone block escuro
-def tile_caixa(size=40):      return get_tile(6,  10, size)  # arco de masmorra – caixa
-def tile_saida(size=40):      return get_tile(4,  10, size)  # grade/portão – saída
+def tile_caixa(size=40):  return _get_dungeon_tile(6,  10, size)
+def tile_saida(size=40):  return _get_dungeon_tile(4,  10, size)
 
 
 # ── frames do personagem ──────────────────────────────────────────────────────
