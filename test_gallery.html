@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>STEALTH OPS — Galeria de Telas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #060810;
+    color: #00e0ff;
+    font-family: 'Courier New', monospace;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 12px #00e0ff;
+    letter-spacing: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #60a0c0;
+    margin-bottom: 28px;
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .card {
+    border: 1px solid #00e0ff44;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a0e1a;
+    box-shadow: 0 0 18px #00e0ff22;
+  }
+  .card:hover {
+    border-color: #00e0ff;
+    box-shadow: 0 0 30px #00e0ff55;
+  }
+  .card-header {
+    padding: 8px 14px;
+    background: #0d1428;
+    border-bottom: 1px solid #00e0ff33;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #00e0ff;
+  }
+  .card-header span { color: #60a0c0; float: right; }
+  .card img {
+    width: 100%;
+    display: block;
+    image-rendering: pixelated;
+  }
+  .status {
+    padding: 6px 14px;
+    font-size: 10px;
+    color: #39ff14;
+    background: #0d1428;
+    border-top: 1px solid #00e0ff22;
+    letter-spacing: 1px;
+  }
+  .status.warn { color: #ffcc00; }
+  .status.err  { color: #ff3040; }
+  .divider {
+    text-align: center;
+    color: #00e0ff33;
+    margin: 14px 0 4px;
+    font-size: 11px;
+    letter-spacing: 4px;
+  }
+</style>
+</head>
+<body>
+<h1>⬡ STEALTH OPS — SOMBRA DIGITAL ⬡</h1>
+<p class="subtitle">RELATÓRIO DE TESTES VISUAIS · TODAS AS TELAS RENDERIZADAS</p>
+
+<div class="grid">
+  <div class="card">
+    <div class="card-header">01 · MENU PRINCIPAL <span>1024×640</span></div>
+    <img src="screenshot_menu.png" alt="Menu Principal">
+    <div class="status">✔ Renderizado — partículas, grid neon, painel cyberpunk, seleção de dificuldade</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">02 · GAMEPLAY · FASE 1 — DOCA ESTENDIDA <span>4 GUARDAS</span></div>
+    <img src="screenshot_gameplay.png" alt="Gameplay Fase 1">
+    <div class="status">✔ Renderizado — HUD completo, cones de visão, minimapa, barras de detecção</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">03 · GAMEPLAY · FASE 2 — CORREDOR INDUSTRIAL <span>5 GUARDAS</span></div>
+    <img src="screenshot_fase2.png" alt="Gameplay Fase 2">
+    <div class="status">✔ Renderizado — mapa maior, mais guardas, guardas animados</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">04 · PAUSA <span>MID-GAME</span></div>
+    <img src="screenshot_pausa.png" alt="Tela de Pausa">
+    <div class="status">✔ Renderizado — overlay translúcido, painel cyberpunk, cantos decorativos</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">05 · GAME OVER — CAPTURADO <span>0 VIDAS</span></div>
+    <img src="screenshot_game_over.png" alt="Game Over">
+    <div class="status warn">⚠ Renderizado — score, rank, resumo de fase, opções de reinício</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">06 · VITÓRIA — CAMPANHA CONCLUÍDA <span>RANK S</span></div>
+    <img src="screenshot_vitoria.png" alt="Vitória">
+    <div class="status">✔ Renderizado — score total, resumo por fase com ranks, título em neon</div>
+  </div>
+</div>
+
+<div class="divider">── FIM DOS TESTES ──</div>
+</body>
+</html>
